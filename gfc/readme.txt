@@ -1,3 +1,6 @@
+Please distribute this file with the GFC runtime environment.
+
+==========================
 GFC - Games Fundamental Classes
 ==========================
 
@@ -6,7 +9,7 @@ by Jarek Francik - purposely developed as an aid to the Games Programming and Ga
 taught at Kingston University, London.
 
 The GFC source code is available from:
-https://gitlab.kingston.ac.uk/KU32139/GFC
+https://github.com/jfrancik/gfc
 
 This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License:
 http://creativecommons.org/licenses/by-sa/4.0/
@@ -24,8 +27,6 @@ Copyright (C) 2009-2019 Jarek Francik, Kingston University London
 jarek@kingston.ac.uk
 
 Sample projects: catchit, fruitninja and spacefighter are written by Andreas Hoppe.
-
-Please distribute this file with the GFC runtime environment.
 
 Version 1.0 20/03/2009
 Version 1.1 11/04/2009

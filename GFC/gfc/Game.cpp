@@ -180,8 +180,6 @@ void CGame::DispatchEvents(SDL_Event* pEvent)
 			}
 			break;
 		case SDL_KEYDOWN:			//key press
-			if (pEvent->key.keysym.sym >= SDLK_1 && pEvent->key.keysym.sym <= SDLK_9 && pEvent->key.keysym.mod == (KMOD_LSHIFT | KMOD_LCTRL))
-				SetLevel(pEvent->key.keysym.sym - SDLK_0);
 			OnKeyDown(pEvent->key.keysym.sym,pEvent->key.keysym.mod,pEvent->key.keysym.unicode);
 			break;
 		case SDL_KEYUP:				//key release
