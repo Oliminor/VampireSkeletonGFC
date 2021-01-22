@@ -76,7 +76,6 @@ void CMyGame::OnDraw(CGraphics* g)
 		return;
 	}
 
-	//g->SetScrollPos(-CameraDX, -CameraDY);
 	int tx = 0;
 	int ty = 0;
 	int tempx = -Player.GetX();
@@ -89,6 +88,7 @@ void CMyGame::OnDraw(CGraphics* g)
 			if (tx > -1 && tx < 64) {
 				if (ty > -1 && ty < 64) {
 					RenderTiles[x][y].SetImage(TileSet[WorldTiles[tx][ty]]);
+					RenderTiles[x][y].SetSize(64, 64);
 					RenderTiles[x][y].Draw(g);
 				}
 			}
@@ -131,15 +131,20 @@ void CMyGame::LoadLevel(int LevelNumber) {
 	WorldObjects.delete_all();
 	for (int x = 0; x < 16; x++) {
 		for (int y = 0; y < 16; y++) {
-			RenderTiles[x][y].LoadImage("Crate.png", "Crate");
-			RenderTiles[x][y].LoadImage("EnemyPad.png", "EnemyPad");
-			RenderTiles[x][y].SetImage("Crate.png");
+			RenderTiles[x][y].LoadImage("Air.bmp", "Air", CColor::White());
+			RenderTiles[x][y].LoadImage("GrassTop.bmp", "GrassTop",CColor::White());
+			RenderTiles[x][y].LoadImage("GrassLeft.bmp", "GrassLeft", CColor::White());
+			RenderTiles[x][y].LoadImage("GrassRight.bmp","GrassRight", CColor::White());
+			RenderTiles[x][y].LoadImage("Dirt.bmp", "Dirt", CColor::White());
 			RenderTiles[x][y].SetPos(x * 64, y * 64);
 		}
 	}
 	if (LevelNumber == 1) {
-		TileSet[0] = "Crate";
-		TileSet[1] = "EnemyPad";
+		TileSet[0] = "Air";
+		TileSet[1] = "GrassTop";
+		TileSet[2] = "GrassRight";
+		TileSet[3] = "GrassLeft";
+		TileSet[4] = "Dirt";
 		LoadMap();
 
 	}
