@@ -7,7 +7,7 @@ CGameApp app;
 int main(int argc, char* argv[])
 {
 	app.OpenConsole();
-	app.OpenWindow(800, 800, "Arcade Movement");
+	app.OpenWindow(800, 800, "Drac 'n bones");
 	//app.OpenFullScreen(800, 600, 24);
 	app.SetClearColor(CColor::Black());
 	app.Run(&game);
