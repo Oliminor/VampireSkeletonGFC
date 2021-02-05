@@ -2,7 +2,6 @@
 #include "MyGame.h"
 #include "iostream"
 #include <fstream>
-#include <string>	
 
 using namespace std;
 
@@ -15,7 +14,23 @@ CMyGame::~CMyGame(void)
 {
 }
 
-void CMyGame::LoadMap() {
+void CMyGame::LoadMap(char* TileMap) {
+	for (int x = 0; x < 28; x++) {//Gives the render tiles there images. This is all hard coded and therefor poor programming by Joe -Joe
+		for (int y = 0; y < 28; y++) {
+			RenderTiles[x][y].LoadImage(TileMap, CColor::White());
+			RenderTiles[x][y].LoadImage(TileMap, "Tile1", CSprite::Sheet(3, 3).Tile(0, 0), CColor::White());
+			RenderTiles[x][y].LoadImage(TileMap, "Tile2", CSprite::Sheet(3, 3).Tile(0, 1), CColor::White());
+			RenderTiles[x][y].LoadImage(TileMap, "Tile3", CSprite::Sheet(3, 3).Tile(0, 2), CColor::White());
+			RenderTiles[x][y].LoadImage(TileMap, "Tile4", CSprite::Sheet(3, 3).Tile(1, 0), CColor::White());
+			RenderTiles[x][y].LoadImage(TileMap, "Tile5", CSprite::Sheet(3, 3).Tile(1, 1), CColor::White());
+			RenderTiles[x][y].LoadImage(TileMap, "Tile6", CSprite::Sheet(3, 3).Tile(1, 2), CColor::White());
+			RenderTiles[x][y].LoadImage(TileMap, "Tile7", CSprite::Sheet(3, 3).Tile(2, 0), CColor::White());
+			RenderTiles[x][y].LoadImage(TileMap, "Tile8", CSprite::Sheet(3, 3).Tile(2, 1), CColor::White());
+			RenderTiles[x][y].LoadImage(TileMap, "Tile9", CSprite::Sheet(3, 3).Tile(2, 2), CColor::White());
+			RenderTiles[x][y].SetPos(x * 32, y * 32);
+		}
+	}
+	//Reads map data
 	fstream File;
 	ifstream Data("MapData.txt");
 	int x = 0;
@@ -24,7 +39,7 @@ void CMyGame::LoadMap() {
 	if (Data.is_open()) {
 		do {
 			Data >> ID;
-			if (ID == -1) {
+			if (ID == -1) {//If -1 is detected then it means theres a new line. I imagine theres an auto way of doing this
 				y++;
 				x = 0;
 			}else {
@@ -35,12 +50,28 @@ void CMyGame::LoadMap() {
 		} while (Data.good());
 		Data.close();
 	}
+
+	//Having the tilesets hard coded is bad, this should be something like a text file
+	TileSet[0] = "Air";
+	TileSet[1] = "Tile1";
+	TileSet[2] = "Tile2";
+	TileSet[3] = "Tile3";
+	TileSet[4] = "Tile4";
+	TileSet[5] = "Tile5";
+	TileSet[6] = "Tile6";
+	TileSet[7] = "Tile7";
+	TileSet[8] = "Tile8";
+	TileSet[9] = "Tile9";
 }
 
-void CMyGame::PlaceObject(char* Image, int X, int Y, int Collision) {
-}
-
-void CMyGame::EnemyAI(CSprite* Enemy, int t) {
+void CMyGame::SaveMap() {
+	ofstream Data("MapData2.txt");
+	for (int x = 0; x < 64; x++) {
+		for (int y = 0; y < 64; y++) {
+			Data << WorldTiles[x][y];
+		}
+	}
+	Data.close();
 }
 
 void CMyGame::OnUpdate()
@@ -50,103 +81,84 @@ void CMyGame::OnUpdate()
 
 	long t = GetTime();
 
-	float NewLevel = false;
-
 	Player.Update(t);
 
-	CameraDX = Player.GetX() / 64;
-	CameraDY = Player.GetY() / 64;
+	Player.SetProperty("TileX",(Player.GetX() / 32));//calcs and sets the players X tile
+	Player.SetProperty("TileY", (Player.GetY() / 32));//calcs and sets the players Y tile
 
-	if (NewLevel == true) {
-		LoadLevel(PlayerLevel);
-	}
-
-}
-
-void CMyGame::PlayerControl()
-{
 
 }
 
 void CMyGame::OnDraw(CGraphics* g)
 {
-	if (IsMenuMode())
+	if (IsMenuMode())//This is for drawing the non-exsistant menu
 	{
 		MainMenuScreen.Draw(g);
 		return;
 	}
 
-	int tx = 0;
-	int ty = 0;
-	int tempx = -Player.GetX();
-	int tempy = -Player.GetY();
-	g->SetScrollPos(tempx % 64, tempy % 64);
-	for (int x = 0; x < 16; x++) {
-		for (int y = 0; y < 16; y++) {
-			tx = CameraDX + x;
-			ty = CameraDY + y;
-			if (tx > -1 && tx < 64) {
-				if (ty > -1 && ty < 64) {
-					RenderTiles[x][y].SetImage(TileSet[WorldTiles[tx][ty]]);
-					RenderTiles[x][y].SetSize(64, 64);
-					RenderTiles[x][y].Draw(g);
-				}
-			}
-		}
+	//GFC can be a bit funny relating to returning values so this has to be split
+	int OffSetX = -Player.GetX();
+	int OffSetY = -Player.GetY();
+
+	if (SmoothScrolling == true) {
+		g->SetScrollPos(OffSetX % 32, OffSetY % 32);//Since tiles are 32 pixels, we want to find the remainder of 32 for player position. This is what allows the "smooth look" of scrolling
 	}
 
-	g->SetScrollPos(-Player.GetX()+400, -Player.GetY()+400);
+	int PlayerTileX = Player.GetProperty("TileX");//TileX is the tile the player is on the X axis. 
+	int PlayerTileY = Player.GetProperty("TileY");//TileY is the tile the player is on the Y axis. 
+	int RenderX = 0;//This the the X value for the render tile.
+	int RenderY = 0;//This the the Y value for the render tile.
+	for (int x = PlayerTileX-12; x < PlayerTileX+14; x++){
+		for (int y = PlayerTileY - 12; y < PlayerTileY + 14; y++) {
+			if (0 <= x && x < 64) {
+				if (0 <= y && y < 64) {
+					char* TileID = TileSet[WorldTiles[x][y]];//Gets the image label from the TileSet List
+					if (TileID != "Air") {//If the tile is air, we dont want to draw anything. be a waste of processing power.
+						RenderTiles[RenderX][RenderY].SetImage(TileID);//Changes the tile being rendered into the right image.
+						RenderTiles[RenderX][RenderY].Draw(g);//You know what this does
+					}
+				}
+			}
+			RenderY++;//increases the render Y index by one
+		}
+		RenderX++;//increases the render X index by one
+		RenderY = 0;//Sets the render Y to 0 cus its a grid layout lol
+	}
 
-	Player.Draw(g);
+	g->SetScrollPos(-Player.GetX()+400, -Player.GetY()+400);//so we can render the player in the middle of the screen
 
-	g->SetScrollPos(0, 0);
+	Player.Draw(g);//renders the player
 
-	*g << bottom << left << "Score: " << PlayerScore << endl;
+	g->SetScrollPos(0, 0);//resets scroll
+
+	//TEXT GO HERE----------------------
+
 }
 
 void CMyGame::OnInitialize()
 {
-	Camera.LoadImage("Player.png", CColor::Black());
-	Camera.SetImage("Player.png");
-	Camera.SetPos(0, 0);
-
-	Player.LoadImage("PlayerSpriteSheet.png");
-	Player.SetImage("PlayerSpriteSheet.png");
-	Player.AddImage("PlayerSpriteSheet.png", "WalkDown", 4, 4, 0, 3, 5, 3, CColor::Black());
-	Player.AddImage("PlayerSpriteSheet.png", "WalkUp", 4, 4, 0, 2, 5, 2, CColor::Black());
-	Player.AddImage("PlayerSpriteSheet.png", "WalkRight", 4, 4, 0, 1, 5, 1, CColor::Black());
-	Player.AddImage("PlayerSpriteSheet.png", "WalkLeft", 4, 4, 0, 0, 5, 0, CColor::Black());
-	Player.SetAnimation("WalkUp", 1);
+	//Loads vampire here
+	Player.LoadImage("VampireIdleLeft.bmp");
+	Player.AddImage("VampireIdleLeft.bmp", "IdleLeft", 5, 1, 0, 0, 5, 0, CColor::White());
+	Player.AddImage("VampireRunLeft.bmp", "RunLeft", 10, 1, 0, 0, 10, 0, CColor::White());
+	Player.AddImage("VampireIdleRight.bmp", "IdleRight", 5, 1, 0, 0, 5, 0, CColor::White());
+	Player.AddImage("VampireRunRight.bmp", "RunRight", 10, 1, 0, 0, 10, 0, CColor::White());
+	Player.SetAnimation("IdleLeft");
 	Player.SetPos(0, 0);
-
-	LoadLevel(PlayerLevel);
 
 	MainMenuScreen.LoadImage("StartScreen.png", CColor::Black());
 	MainMenuScreen.SetImage("StartScreen.png");
 	MainMenuScreen.SetPosition(400, 300);
 
+	LoadLevel(1);
+
 }
 
 void CMyGame::LoadLevel(int LevelNumber) {
-	WorldObjects.delete_all();
-	for (int x = 0; x < 16; x++) {
-		for (int y = 0; y < 16; y++) {
-			RenderTiles[x][y].LoadImage("Air.bmp", "Air", CColor::White());
-			RenderTiles[x][y].LoadImage("GrassTop.bmp", "GrassTop",CColor::White());
-			RenderTiles[x][y].LoadImage("GrassLeft.bmp", "GrassLeft", CColor::White());
-			RenderTiles[x][y].LoadImage("GrassRight.bmp","GrassRight", CColor::White());
-			RenderTiles[x][y].LoadImage("Dirt.bmp", "Dirt", CColor::White());
-			RenderTiles[x][y].SetPos(x * 64, y * 64);
-		}
-	}
-	if (LevelNumber == 1) {
-		TileSet[0] = "Air";
-		TileSet[1] = "GrassTop";
-		TileSet[2] = "GrassRight";
-		TileSet[3] = "GrassLeft";
-		TileSet[4] = "Dirt";
-		LoadMap();
-
+	
+	if (LevelNumber == 1) {//This is the place holder level
+		LoadMap("level01Tiles.bmp");//Thats the single texture. this should be changed cus its poor Joe, very poor. -Joe
 	}
 
 	else if (LevelNumber == 2) {
@@ -184,22 +196,20 @@ void CMyGame::OnKeyDown(SDLKey sym, SDLMod mod, Uint16 unicode)
 			StartGame();
 		}
 	}
-	else {
+	else {//Feel free to remove the movement I did. It was just temp-Joe
 		if (sym == SDLK_a) {
-			Player.SetAnimation("WalkLeft", 10);
-			Player.SetXVelocity(-PlayerSpeed);
+			Player.SetAnimation("RunLeft");
+			Player.SetXVelocity(-480);
 		}
 		if (sym == SDLK_d) {
-			Player.SetAnimation("WalkRight", 10);
-			Player.SetXVelocity(+PlayerSpeed);
+			Player.SetAnimation("RunRight");
+			Player.SetXVelocity(+480);
 		}
 		if (sym == SDLK_w) {
-			Player.SetAnimation("WalkUp", 10);
-			Player.SetYVelocity(+PlayerSpeed);
+			Player.SetYVelocity(+480);
 		}
 		if (sym == SDLK_s) {
-			Player.SetAnimation("WalkDown", 10);
-			Player.SetYVelocity(-PlayerSpeed);
+			Player.SetYVelocity(-480);
 		}
 	}
 }
@@ -210,11 +220,13 @@ void CMyGame::OnKeyUp(SDLKey sym, SDLMod mod, Uint16 unicode)
 	{
 		StartGame();
 	}
-	else {
+	else {//Feel free to remove the movement I did. It was just temp-Joe
 		if (sym == SDLK_a) {
+			Player.SetAnimation("IdleLeft");
 			Player.SetXVelocity(0);
 		}
 		if (sym == SDLK_d) {
+			Player.SetAnimation("IdleRight");
 			Player.SetXVelocity(0);
 		}
 		if (sym == SDLK_w) {
@@ -229,11 +241,18 @@ void CMyGame::OnKeyUp(SDLKey sym, SDLMod mod, Uint16 unicode)
 
 void CMyGame::OnMouseMove(Uint16 x,Uint16 y,Sint16 relx,Sint16 rely,bool bLeft,bool bRight,bool bMiddle)
 {
-	//Player.SetDirection(x - Camera.GetX(),y - Camera.GetY());
 }
 
 void CMyGame::OnLButtonDown(Uint16 x,Uint16 y)
 {
+	//Please note this is super temp and will 100% be removed-Joe
+	int X = Player.GetProperty("TileX");
+	int Y = Player.GetProperty("TileY");
+	WorldTiles[X][Y]++;
+	if (WorldTiles[X][Y] > 9) {
+		WorldTiles[X][Y] = 0;
+	}
+	//Please note this is super temp and will 100% be removed-Joe
 }
 
 void CMyGame::OnLButtonUp(Uint16 x,Uint16 y)
@@ -242,6 +261,7 @@ void CMyGame::OnLButtonUp(Uint16 x,Uint16 y)
 
 void CMyGame::OnRButtonDown(Uint16 x,Uint16 y)
 {
+	SaveMap();
 }
 
 void CMyGame::OnRButtonUp(Uint16 x,Uint16 y)
