@@ -15,6 +15,28 @@ CMyGame::~CMyGame(void)
 }
 
 void CMyGame::LoadMap(char* TileMap) {
+	char* Arr[6];
+	Arr[0] = "level00Background.bmp";
+	Arr[1] = "level00Foreground.bmp";
+	Arr[2] = "level00Layer1.bmp";
+	Arr[3] = "level01Layer2.bmp";
+	Arr[4] = "level01Layer3.bmp";
+	Arr[5] = "level01Layer4.bmp";
+	for (int i = 0; i < 3; i++) {
+		CSprite* Background = new CSprite(0, 0, 0, 0, GetTime());
+		Background->LoadImage(Arr[i], "Background", CColor::White());
+		Background->SetImage("Background");
+		int x = Background->GetWidth();
+		int y = Background->GetHeight();
+		Background->SetProperty("ScrollingSpeed", 100);
+		Background->SetSize(x*2,y*2);
+		Background->SetPos(640,640);
+		//Background->SetBottom(0);
+		Backgrounds.push_back(Background);
+	}
+	
+
+
 	for (int x = 0; x < 28; x++) {//Gives the render tiles there images. This is all hard coded and therefor poor programming by Joe -Joe
 		for (int y = 0; y < 28; y++) {
 			RenderTiles[x][y].LoadImage(TileMap, CColor::White());
@@ -100,6 +122,13 @@ void CMyGame::OnDraw(CGraphics* g)
 	//GFC can be a bit funny relating to returning values so this has to be split
 	int OffSetX = -Player.GetX();
 	int OffSetY = -Player.GetY();
+
+	for (CSprite* Background : Backgrounds) {
+		int ScrollSpeed = Background->GetProperty("ScrollingSpeed");
+		ScrollSpeed /= 100;
+		g->SetScrollPos(OffSetX * ScrollSpeed, OffSetY);
+		Background->Draw(g);
+	}
 
 	if (SmoothScrolling == true) {
 		g->SetScrollPos(OffSetX % 32, OffSetY % 32);//Since tiles are 32 pixels, we want to find the remainder of 32 for player position. This is what allows the "smooth look" of scrolling

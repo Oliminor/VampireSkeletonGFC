@@ -13,6 +13,8 @@ public:
 
 	CSprite MainMenuScreen;
 
+	CSpriteList Backgrounds;
+
 	void LoadMap(char* TileMap);
 
 	void SaveMap();
