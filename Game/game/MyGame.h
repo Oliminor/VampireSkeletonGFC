@@ -1,11 +1,12 @@
 #pragma once
+#include <SDL_image.h>
 
 class CMyGame : public CGame
 {
 public:
 
 	CSprite RenderTiles[28][28];//Render Tiles is here so we can have a smaller list of CSprites and not chew through ram.
-	int  WorldTiles[64][64];//This is the world tile data. ATM the world is stuck at 64 by 64. this should be changed
+	int WorldTiles[64][64];//This is the world tile data. ATM the world is stuck at 64 by 64. this should be changed
 	char* TileSet[64] = { "Air" };//Creates the tile set and sets it all to "air"
 	bool SmoothScrolling = true;//This toggles smooth moving of the world. if false the world will jitter
 

@@ -2,6 +2,8 @@
 #include "MyGame.h"
 #include "iostream"
 #include <fstream>
+#include <SDL_image.h>
+#include <SDL.h>
 
 using namespace std;
 
@@ -40,15 +42,11 @@ void CMyGame::LoadMap(char* TileMap) {
 	for (int x = 0; x < 28; x++) {//Gives the render tiles there images. This is all hard coded and therefor poor programming by Joe -Joe
 		for (int y = 0; y < 28; y++) {
 			RenderTiles[x][y].LoadImage(TileMap, CColor::White());
-			RenderTiles[x][y].LoadImage(TileMap, "Tile1", CSprite::Sheet(3, 3).Tile(0, 0), CColor::White());
-			RenderTiles[x][y].LoadImage(TileMap, "Tile2", CSprite::Sheet(3, 3).Tile(0, 1), CColor::White());
-			RenderTiles[x][y].LoadImage(TileMap, "Tile3", CSprite::Sheet(3, 3).Tile(0, 2), CColor::White());
-			RenderTiles[x][y].LoadImage(TileMap, "Tile4", CSprite::Sheet(3, 3).Tile(1, 0), CColor::White());
-			RenderTiles[x][y].LoadImage(TileMap, "Tile5", CSprite::Sheet(3, 3).Tile(1, 1), CColor::White());
-			RenderTiles[x][y].LoadImage(TileMap, "Tile6", CSprite::Sheet(3, 3).Tile(1, 2), CColor::White());
-			RenderTiles[x][y].LoadImage(TileMap, "Tile7", CSprite::Sheet(3, 3).Tile(2, 0), CColor::White());
-			RenderTiles[x][y].LoadImage(TileMap, "Tile8", CSprite::Sheet(3, 3).Tile(2, 1), CColor::White());
-			RenderTiles[x][y].LoadImage(TileMap, "Tile9", CSprite::Sheet(3, 3).Tile(2, 2), CColor::White());
+			for (int TileImageX = 0; TileImageX < 3; TileImageX++) {
+				for (int TileImageY = 0; TileImageY < 6; TileImageY++) {
+					RenderTiles[x][y].LoadImage(TileMap, TileImageX + TileImageY, CSprite::Sheet(3, 6).Tile(TileImageX, TileImageY), CColor::White());
+				}
+			}
 			RenderTiles[x][y].SetPos(x * 32, y * 32);
 		}
 	}
@@ -73,17 +71,6 @@ void CMyGame::LoadMap(char* TileMap) {
 		Data.close();
 	}
 
-	//Having the tilesets hard coded is bad, this should be something like a text file
-	TileSet[0] = "Air";
-	TileSet[1] = "Tile1";
-	TileSet[2] = "Tile2";
-	TileSet[3] = "Tile3";
-	TileSet[4] = "Tile4";
-	TileSet[5] = "Tile5";
-	TileSet[6] = "Tile6";
-	TileSet[7] = "Tile7";
-	TileSet[8] = "Tile8";
-	TileSet[9] = "Tile9";
 }
 
 void CMyGame::SaveMap() {
@@ -142,8 +129,9 @@ void CMyGame::OnDraw(CGraphics* g)
 		for (int y = PlayerTileY - 12; y < PlayerTileY + 14; y++) {
 			if (0 <= x && x < 64) {
 				if (0 <= y && y < 64) {
-					char* TileID = TileSet[WorldTiles[x][y]];//Gets the image label from the TileSet List
-					if (TileID != "Air") {//If the tile is air, we dont want to draw anything. be a waste of processing power.
+					int TileID = WorldTiles[x][y];//Gets the image label from the TileSet List
+					if (TileID != 0) {//If the tile is air, we dont want to draw anything. be a waste of processing power.
+						cout << &TileID << endl;
 						RenderTiles[RenderX][RenderY].SetImage(TileID);//Changes the tile being rendered into the right image.
 						RenderTiles[RenderX][RenderY].Draw(g);//You know what this does
 					}
