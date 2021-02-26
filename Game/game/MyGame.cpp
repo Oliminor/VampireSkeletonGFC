@@ -2,8 +2,6 @@
 #include "MyGame.h"
 #include "iostream"
 #include <fstream>
-#include <SDL_image.h>
-#include <SDL.h>
 
 using namespace std;
 
@@ -39,15 +37,18 @@ void CMyGame::LoadMap(char* TileMap) {
 	
 
 
-	for (int x = 0; x < 28; x++) {//Gives the render tiles there images. This is all hard coded and therefor poor programming by Joe -Joe
-		for (int y = 0; y < 28; y++) {
+	for (int x = 0; x < 14; x++) {//Gives the render tiles there images. This is all hard coded and therefor poor programming by Joe -Joe
+		for (int y = 0; y < 14; y++) {
 			RenderTiles[x][y].LoadImage(TileMap, CColor::White());
+			int Index = 1;
 			for (int TileImageX = 0; TileImageX < 3; TileImageX++) {
 				for (int TileImageY = 0; TileImageY < 6; TileImageY++) {
-					RenderTiles[x][y].LoadImage(TileMap, TileImageX + TileImageY, CSprite::Sheet(3, 6).Tile(TileImageX, TileImageY), CColor::White());
+					RenderTiles[x][y].LoadImage(TileMap, TileSet[Index], CSprite::Sheet(3, 6).Tile(TileImageX, TileImageY), CColor::White());
+					Index++;
 				}
 			}
-			RenderTiles[x][y].SetPos(x * 32, y * 32);
+			
+			RenderTiles[x][y].SetPos(x * 64, y * 64);
 		}
 	}
 	//Reads map data
@@ -75,9 +76,9 @@ void CMyGame::LoadMap(char* TileMap) {
 
 void CMyGame::SaveMap() {
 	ofstream Data("MapData2.txt");
-	for (int x = 0; x < 64; x++) {
-		for (int y = 0; y < 64; y++) {
-			Data << WorldTiles[x][y];
+	for (int x = 0; x < MapSizeX; x++) {
+		for (int y = 0; y < MapSizeY; y++) {
+			
 		}
 	}
 	Data.close();
@@ -92,8 +93,8 @@ void CMyGame::OnUpdate()
 
 	Player.Update(t);
 
-	Player.SetProperty("TileX",(Player.GetX() / 32));//calcs and sets the players X tile
-	Player.SetProperty("TileY", (Player.GetY() / 32));//calcs and sets the players Y tile
+	Player.SetProperty("TileX",(Player.GetX() / 64));//calcs and sets the players X tile
+	Player.SetProperty("TileY", (Player.GetY() / 64));//calcs and sets the players Y tile
 
 
 }
@@ -118,21 +119,21 @@ void CMyGame::OnDraw(CGraphics* g)
 	}
 
 	if (SmoothScrolling == true) {
-		g->SetScrollPos(OffSetX % 32, OffSetY % 32);//Since tiles are 32 pixels, we want to find the remainder of 32 for player position. This is what allows the "smooth look" of scrolling
+		g->SetScrollPos(OffSetX % 64, OffSetY % 64);//Since tiles are 32 pixels, we want to find the remainder of 32 for player position. This is what allows the "smooth look" of scrolling
 	}
 
 	int PlayerTileX = Player.GetProperty("TileX");//TileX is the tile the player is on the X axis. 
 	int PlayerTileY = Player.GetProperty("TileY");//TileY is the tile the player is on the Y axis. 
 	int RenderX = 0;//This the the X value for the render tile.
 	int RenderY = 0;//This the the Y value for the render tile.
-	for (int x = PlayerTileX-12; x < PlayerTileX+14; x++){
-		for (int y = PlayerTileY - 12; y < PlayerTileY + 14; y++) {
+	for (int x = PlayerTileX-6; x < PlayerTileX+8; x++){
+		for (int y = PlayerTileY - 6; y < PlayerTileY + 8; y++) {
 			if (0 <= x && x < 64) {
 				if (0 <= y && y < 64) {
-					int TileID = WorldTiles[x][y];//Gets the image label from the TileSet List
-					if (TileID != 0) {//If the tile is air, we dont want to draw anything. be a waste of processing power.
-						cout << &TileID << endl;
+					char* TileID = TileSet[WorldTiles[x][y]];//Gets the image label from the TileSet List
+					if (TileID != "Air") {//If the tile is air, we dont want to draw anything. be a waste of processing power.
 						RenderTiles[RenderX][RenderY].SetImage(TileID);//Changes the tile being rendered into the right image.
+						RenderTiles[RenderX][RenderY].SetSize(64, 64);
 						RenderTiles[RenderX][RenderY].Draw(g);//You know what this does
 					}
 				}
@@ -143,8 +144,10 @@ void CMyGame::OnDraw(CGraphics* g)
 		RenderY = 0;//Sets the render Y to 0 cus its a grid layout lol
 	}
 
-	g->SetScrollPos(-Player.GetX()+400, -Player.GetY()+400);//so we can render the player in the middle of the screen
+	//g->SetScrollPos(-Player.GetX()+400, -Player.GetY()+400);//so we can render the player in the middle of the screen
 
+	g->SetScrollPos(-Player.GetX(), -Player.GetY());
+	Player.SetSize(128, 128);
 	Player.Draw(g);//renders the player
 
 	g->SetScrollPos(0, 0);//resets scroll
@@ -175,6 +178,27 @@ void CMyGame::OnInitialize()
 void CMyGame::LoadLevel(int LevelNumber) {
 	
 	if (LevelNumber == 1) {//This is the place holder level
+		TileSet[1] = "PlatformEdgeL";//Creates the tile set and sets it all to "air"
+		TileSet[2] = "PlatformMid";//Creates the tile set and sets it all to "air"
+		TileSet[3] = "PlatformEdgeR";//Creates the tile set and sets it all to "air"
+
+		TileSet[4] = "CornerBR";//Creates the tile set and sets it all to "air"
+		TileSet[5] = "CornerBL";//Creates the tile set and sets it all to "air"
+		TileSet[6] = "PlatfromSingle";//Creates the tile set and sets it all to "air"
+		TileSet[7] = "CornerTR";//Creates the tile set and sets it all to "air"
+		TileSet[8] = "CornerTL";//Creates the tile set and sets it all to "air"
+		TileSet[9] = "Blank";//Creates the tile set and sets it all to "air"
+
+		TileSet[10] = "EdgeTL";//Creates the tile set and sets it all to "air"
+		TileSet[11] = "EdgeT";//Creates the tile set and sets it all to "air"
+		TileSet[12] = "EdgeTR";//Creates the tile set and sets it all to "air"
+		TileSet[13] = "EdgeL";//Creates the tile set and sets it all to "air"
+		TileSet[14] = "Middle";//Creates the tile set and sets it all to "air"
+		TileSet[15] = "EdgeR";//Creates the tile set and sets it all to "air"
+		TileSet[16] = "EdgeBL";//Creates the tile set and sets it all to "air"
+		TileSet[17] = "EdgeB";//Creates the tile set and sets it all to "air"
+		TileSet[18] = "EdgeBR";//Creates the tile set and sets it all to "air"
+
 		LoadMap("level01Tiles.bmp");//Thats the single texture. this should be changed cus its poor Joe, very poor. -Joe
 	}
 
